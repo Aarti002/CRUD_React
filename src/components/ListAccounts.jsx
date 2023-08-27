@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React, { Component, useState } from "react";
 import AccountService from "../services/AccountService";
 import { Route } from "react-router-dom/cjs/react-router-dom.min";
 import UpdateAccount from "./UpdateAccount";
@@ -9,10 +9,13 @@ class ListAccounts extends Component {
     super(props);
     this.state = {
       accounts: [],
+      filterAccounts: [],
     };
     this.addAccount = this.addAccount.bind(this);
     this.editAccount = this.editAccount.bind(this);
     this.deleteAccount = this.deleteAccount.bind(this);
+    this.getAccount = this.getAccount.bind(this);
+    this.filterBySearch = this.filterBySearch.bind(this);
   }
 
   deleteAccount(id) {
@@ -42,17 +45,41 @@ class ListAccounts extends Component {
     });
   }
 
+  filterBySearch(event) {
+    AccountService.getAccounts().then((res) => {
+      this.setState({ accounts: res.data });
+    });
+    const query = event.target.value;
+    let updateList = [...this.state.accounts];
+    console.log(updateList);
+    updateList = updateList.filter((itm) => {
+      return itm.name.toLowerCase().indexOf(query.toLowerCase()) !== -1;
+    });
+    this.setState({ filterAccounts: updateList });
+  }
+
   render() {
     return (
       <div>
-        <h2 className="text-center my-2">Account List</h2>
-
-        <button className="btn btn-primary mx-2" onClick={this.addAccount}>
+        <button className="btn btn-primary mx-2 my-2" onClick={this.addAccount}>
           Add Account
         </button>
 
         <br></br>
-        <div className="row">
+        <div className="row mx-2 my-2">
+          <div className="search-header">
+            <div className="search-text mx-2 my-2">
+              Search:
+              <input
+                id="search-box"
+                className="mx-2"
+                onChange={this.filterBySearch}
+              />
+            </div>
+          </div>
+          <br></br>
+          <h4 className="text-center my-2">Search List</h4>
+          <br></br>
           <table
             className="table table-hover table-bordered mx-2 my-2"
             responsive="sm"
@@ -67,36 +94,91 @@ class ListAccounts extends Component {
               </tr>
             </thead>
             <tbody>
-              {this.state.accounts.map((acc) => (
-                <tr key={acc.id}>
-                  <td> {acc.id} </td>
-                  <td> {acc.name} </td>
-                  <td> {acc.email}</td>
-                  <td> {acc.phone}</td>
-                  <td>
-                    <button
-                      onClick={() => this.editAccount(acc.id)}
-                      className="btn btn-info"
-                    >
-                      Update{" "}
-                    </button>
-                    <button
-                      style={{ marginLeft: "10px" }}
-                      onClick={() => this.deleteAccount(acc.id)}
-                      className="btn btn-secondary"
-                    >
-                      Delete{" "}
-                    </button>
-                    <button
-                      style={{ marginLeft: "10px" }}
-                      className="btn btn-info"
-                      onClick={() => this.getAccount(acc.id)}
-                    >
-                      View{" "}
-                    </button>
-                  </td>
-                </tr>
-              ))}
+              {Array.isArray(this.state.filterAccounts)
+                ? this.state.filterAccounts.map((acc) => (
+                    <tr key={acc.id}>
+                      <td> {acc.id} </td>
+                      <td> {acc.name} </td>
+                      <td> {acc.email}</td>
+                      <td> {acc.phone}</td>
+                      <td>
+                        <button
+                          onClick={() => this.editAccount(acc.id)}
+                          className="btn btn-info"
+                        >
+                          Update{" "}
+                        </button>
+                        <button
+                          style={{ marginLeft: "10px" }}
+                          onClick={() => this.deleteAccount(acc.id)}
+                          className="btn btn-secondary"
+                        >
+                          Delete{" "}
+                        </button>
+                        <button
+                          style={{ marginLeft: "10px" }}
+                          className="btn btn-info"
+                          onClick={() => this.getAccount(acc.id)}
+                        >
+                          View{" "}
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+                : null}
+            </tbody>
+          </table>
+
+          <hr />
+          <br></br>
+
+          <h4 className="text-center my-2">Account List</h4>
+          <table
+            className="table table-hover table-bordered mx-2 my-2"
+            responsive="sm"
+          >
+            <thead>
+              <tr className="">
+                <th> ID </th>
+                <th> Name</th>
+                <th> Email</th>
+                <th> Phone</th>
+                <th> Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {Array.isArray(this.state.accounts)
+                ? this.state.accounts.map((acc) => (
+                    <tr key={acc.id}>
+                      <td> {acc.id} </td>
+                      <td> {acc.name} </td>
+                      <td> {acc.email}</td>
+                      <td> {acc.phone}</td>
+                      <td>
+                        <button
+                          onClick={() => this.editAccount(acc.id)}
+                          className="btn btn-info"
+                        >
+                          Update{" "}
+                        </button>
+                        <button
+                          style={{ marginLeft: "10px" }}
+                          onClick={() => this.deleteAccount(acc.id)}
+                          className="btn btn-secondary"
+                        >
+                          Delete{" "}
+                        </button>
+                        <button
+                          style={{ marginLeft: "10px" }}
+                          className="btn btn-info"
+                          onClick={() => this.getAccount(acc.id)}
+                        >
+                          View{" "}
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+                : null}
             </tbody>
           </table>
         </div>
